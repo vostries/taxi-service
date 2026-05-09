@@ -1,4 +1,5 @@
-import os, sys
+import os
+import sys
 import time
 import uuid
 import unittest
@@ -156,7 +157,7 @@ class TaxiServiceE2ETest(unittest.TestCase):
         payload = {
             "email": f"passenger_{suffix}@test.com",
             "password": "123456",
-            "name": "Passenger Demo",
+            "name": f"[TEST test_01_register_passenger] Passenger Demo",
             "phone": f"+7900{int(time.time()) % 10_000_000:07d}",
             "userType": "PASSENGER",
         }
@@ -177,7 +178,7 @@ class TaxiServiceE2ETest(unittest.TestCase):
         payload = {
             "email": f"driver_{suffix}@test.com",
             "password": "123456",
-            "name": "Driver Demo",
+            "name": f"[TEST test_02_register_driver] Driver Demo",
             "phone": f"+7911{int(time.time()) % 10_000_000:07d}",
             "userType": "DRIVER",
             "licenseNumber": f"LIC-{suffix.upper()}",
@@ -348,7 +349,7 @@ class TaxiServiceE2ETest(unittest.TestCase):
             "tripId": self.trip_id,
             "recipientType": "PASSENGER",
             "recipientId": self.passenger_id,
-            "message": "Manual API notification test",
+            "message": f"[TEST test_10_manual_notification_endpoint] Manual API notification test",
         }
         created = self.request_json(
             "POST",
@@ -370,7 +371,7 @@ class TaxiServiceE2ETest(unittest.TestCase):
                 json={
                     "email": f"p_conc_{suffix}@test.com",
                     "password": "123456",
-                    "name": "Passenger Concurrency",
+                    "name": f"[TEST test_11_driver_not_assigned_to_two_trips_concurrently] Passenger Concurrency",
                     "phone": f"+7922{int(time.time() * 1000) % 10_000_000:07d}",
                     "userType": "PASSENGER",
                 },
@@ -386,7 +387,7 @@ class TaxiServiceE2ETest(unittest.TestCase):
                 json={
                     "email": f"d_conc_{suffix}@test.com",
                     "password": "123456",
-                    "name": "Driver Concurrency",
+                    "name": f"[TEST test_11_driver_not_assigned_to_two_trips_concurrently] Driver Concurrency",
                     "phone": f"+7933{int(time.time() * 1000) % 10_000_000:07d}",
                     "userType": "DRIVER",
                     "licenseNumber": f"LIC-C-{suffix.upper()}",
@@ -448,7 +449,7 @@ class TaxiServiceE2ETest(unittest.TestCase):
             json={
                 "email": f"p_queue_{suffix}@test.com",
                 "password": "123456",
-                "name": "Passenger Queue",
+                "name": f"[TEST test_12_trip_event_published_to_rabbit_queue] Passenger Queue",
                 "phone": f"+7944{int(time.time() * 1000) % 10_000_000:07d}",
                 "userType": "PASSENGER",
             },
@@ -460,7 +461,7 @@ class TaxiServiceE2ETest(unittest.TestCase):
             json={
                 "email": f"d_queue_{suffix}@test.com",
                 "password": "123456",
-                "name": "Driver Queue",
+                "name": f"[TEST test_12_trip_event_published_to_rabbit_queue] Driver Queue",
                 "phone": f"+7955{int(time.time() * 1000) % 10_000_000:07d}",
                 "userType": "DRIVER",
                 "licenseNumber": f"LIC-Q-{suffix.upper()}",
@@ -484,7 +485,7 @@ class TaxiServiceE2ETest(unittest.TestCase):
             json={
                 "passengerId": passenger["userId"],
                 "origin": "Moscow, Lenina 1",
-                "destination": "Moscow, Pushkina 10",
+                "destination": "Moscow, kreml",
             },
         )
 
