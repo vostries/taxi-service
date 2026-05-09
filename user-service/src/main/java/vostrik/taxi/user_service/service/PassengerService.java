@@ -2,49 +2,52 @@ package vostrik.taxi.user_service.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import vostrik.taxi.user_service.dto.PassengerRequest;
 import vostrik.taxi.user_service.dto.PassengerResponse;
-import vostrik.taxi.user_service.entity.Passenger;
-import vostrik.taxi.user_service.exception.BadRequestException;
+import vostrik.taxi.user_service.entity.User;
 import vostrik.taxi.user_service.exception.ResourceNotFoundException;
-import vostrik.taxi.user_service.repository.PassengerRepository;
+import vostrik.taxi.user_service.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
 public class PassengerService {
 
-    private final PassengerRepository passengerRepository;
-
-    public PassengerResponse createPassenger(PassengerRequest request) {
-        if (passengerRepository.existsByEmail(request.getEmail())) {
-            throw new BadRequestException("Passenger with this email already exists");
-        }
-        Passenger passenger = Passenger.builder()
-                .name(request.getName())
-                .email(request.getEmail())
-                .phone(request.getPhone())
-                .build();
-        passenger = passengerRepository.save(passenger);
-        return toResponse(passenger);
-    }
+    private final UserRepository userRepository;
 
     public PassengerResponse getPassenger(Long id) {
-        Passenger passenger = passengerRepository.findById(id)
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Passenger not found: " + id));
-        return toResponse(passenger);
+        if (!"PASSENGER".equals(user.getUserType())) {
+            throw new ResourceNotFoundException("Passenger not found: " + id);
+        }
+        return toResponse(user);
     }
 
     public boolean passengerExists(Long id) {
-        return passengerRepository.existsById(id);
+        return userRepository.existsByIdAndUserType(id, "PASSENGER");
     }
 
-    private PassengerResponse toResponse(Passenger p) {
+    @Transactional
+    public PassengerResponse updatePassengerProfile(Long id, PassengerRequest request) {
+        User passenger = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Passenger not found: " + id));
+        if (!"PASSENGER".equals(passenger.getUserType())) {
+            throw new ResourceNotFoundException("Passenger not found: " + id);
+        }
+        passenger.setName(request.getName());
+        passenger.setPhone(request.getPhone());
+        passenger = userRepository.save(passenger);
+        return toResponse(passenger);
+    }
+
+    private PassengerResponse toResponse(User u) {
         return PassengerResponse.builder()
-                .id(p.getId())
-                .name(p.getName())
-                .email(p.getEmail())
-                .phone(p.getPhone())
-                .createdAt(p.getCreatedAt())
+                .id(u.getId())
+                .name(u.getName())
+                .email(u.getEmail())
+                .phone(u.getPhone())
+                .createdAt(u.getCreatedAt())
                 .build();
     }
 }

@@ -13,10 +13,7 @@ import vostrik.taxi.user_service.repository.UserRepository;
 public class AuthService {
 
     private final UserRepository userRepository;
-    private final PassengerService passengerService;
-    private final DriverService driverService;
     private final JwtService jwtService;
-
     private final PasswordEncoder passwordEncoder;
 
     public AuthResponse register(RegisterRequest request) {
@@ -24,43 +21,26 @@ public class AuthService {
             throw new BadRequestException("Email already registered");
         }
 
-        Long userId;
         String userType = request.getUserType().toUpperCase();
-
-        if ("PASSENGER".equals(userType)) {
-            PassengerResponse passenger = passengerService.createPassenger(
-                    PassengerRequest.builder()
-                            .name(request.getName())
-                            .email(request.getEmail())
-                            .phone(request.getPhone())
-                            .build());
-            userId = passenger.getId();
-        } else if ("DRIVER".equals(userType)) {
-            DriverResponse driver = driverService.createDriver(
-                    DriverRequest.builder()
-                            .name(request.getName())
-                            .email(request.getEmail())
-                            .phone(request.getPhone())
-                            .licenseNumber(request.getLicenseNumber())
-                            .build());
-            userId = driver.getId();
-        } else {
+        if (!"PASSENGER".equals(userType) && !"DRIVER".equals(userType)) {
             throw new BadRequestException("Invalid user type: " + userType);
         }
 
         User user = User.builder()
+                .name(request.getName())
                 .email(request.getEmail())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
+                .phone(request.getPhone())
                 .userType(userType)
-                .userId(userId)
+                .licenseNumber(request.getLicenseNumber())
                 .build();
-        userRepository.save(user);
+        user = userRepository.save(user);
 
-        String token = jwtService.generateToken(user.getEmail(), userType, userId);
+        String token = jwtService.generateToken(user.getEmail(), userType, user.getId());
         return AuthResponse.builder()
                 .token(token)
                 .userType(userType)
-                .userId(userId)
+                .userId(user.getId())
                 .build();
     }
 
@@ -72,11 +52,11 @@ public class AuthService {
             throw new BadRequestException("Invalid email or password");
         }
 
-        String token = jwtService.generateToken(user.getEmail(), user.getUserType(), user.getUserId());
+        String token = jwtService.generateToken(user.getEmail(), user.getUserType(), user.getId());
         return AuthResponse.builder()
                 .token(token)
                 .userType(user.getUserType())
-                .userId(user.getUserId())
+                .userId(user.getId())
                 .build();
     }
 }

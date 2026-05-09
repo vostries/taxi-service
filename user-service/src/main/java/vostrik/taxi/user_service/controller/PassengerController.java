@@ -15,9 +15,10 @@ public class PassengerController {
 
     private final PassengerService passengerService;
 
-    @PostMapping
-    public ResponseEntity<PassengerResponse> create(@Valid @RequestBody PassengerRequest request) {
-        return ResponseEntity.status(201).body(passengerService.createPassenger(request));
+    @PatchMapping("/{id}")
+    public ResponseEntity<PassengerResponse> updateProfile(@PathVariable Long id,
+                                                            @Valid @RequestBody PassengerRequest request) {
+        return ResponseEntity.ok(passengerService.updatePassengerProfile(id, request));
     }
 
     @GetMapping("/{id}")

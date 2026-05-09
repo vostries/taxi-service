@@ -16,9 +16,10 @@ public class DriverController {
 
     private final DriverService driverService;
 
-    @PostMapping
-    public ResponseEntity<DriverResponse> create(@Valid @RequestBody DriverRequest request) {
-        return ResponseEntity.status(201).body(driverService.createDriver(request));
+    @PatchMapping("/{id}")
+    public ResponseEntity<DriverResponse> updateProfile(@PathVariable Long id,
+                                                         @Valid @RequestBody DriverRequest request) {
+        return ResponseEntity.ok(driverService.updateDriverProfile(id, request));
     }
 
     @GetMapping("/{id}")
